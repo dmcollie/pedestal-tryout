@@ -2,7 +2,23 @@
   (:require [io.pedestal.http :as http]
             [io.pedestal.http.route :as route]
             [io.pedestal.http.body-params :as body-params]
-            [ring.util.response :as ring-resp]))
+            [ring.util.response :as ring-resp]
+            [hiccup.page :as hiccup]))
+
+; TODO integrate hiccup - look at https://github.com/pedestal/samples/blob/master/template-server/src/template_server/service.clj
+(defn- title-as     [t] (format "Hello from %s!" t))
+(defn- current-date []  (str (java.util.Date.)))
+
+(defn hiccup-page
+  [request]
+  (ring-resp/response (hiccup/html5
+                        [:body
+                         [:h1 {:id "the-title"} (title-as "Hiccup")]
+                         [:hr]
+                         [:p "This page was rendered with Hiccup!"]
+                         [:br]
+                         [:p {:id "the-text"}   "Hello from the Hiccup demo. Do you need a glass of water?"]
+                         [:p {:id "the-date"}   (current-date)]])))
 
 (defn about-page
   [request]
@@ -12,7 +28,7 @@
 
 (defn home-page
   [request]
-  (ring-resp/response "Hello World! Cowabunga dude!"))
+  (ring-resp/response "Hello World! Cowabunga dudes!"))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -20,7 +36,7 @@
 (def common-interceptors [(body-params/body-params) http/html-body])
 
 ;; Tabular routes
-(def routes #{["/" :get (conj common-interceptors `home-page)]
+(def routes #{["/" :get (conj common-interceptors `hiccup-page)]
               ["/about" :get (conj common-interceptors `about-page)]})
 
 ;; Map-based routes
